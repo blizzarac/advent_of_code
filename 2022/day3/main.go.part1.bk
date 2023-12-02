@@ -1,0 +1,80 @@
+package main
+
+
+import (
+	"io/ioutil"
+	"log"
+	"os"
+	"strings"
+	"unicode"
+)
+
+func calculatePriority(item1 rune, item2 rune) int {
+	result := 0
+	if unicode.IsLower(item1) {
+		log.Println("Found: ", string(item1), "priority: ", int(item1)-96)
+		result += int(item1) - 96
+	} else {
+		log.Println("Found: ", string(item1), "priority: ", int(item1)-38)
+		result += int(item1) - 38
+	}
+
+	return result
+}
+
+func removeDuplicate[T string | int | rune](sliceList []T) []T {
+    allKeys := make(map[T]bool)
+    list := []T{}
+    for _, item := range sliceList {
+        if _, value := allKeys[item]; !value {
+            allKeys[item] = true
+            list = append(list, item)
+        }
+    }
+    return list
+}
+
+func main() {
+
+	file, err := os.Open("input.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lines := strings.Split(string(content), "\n")
+
+	result := 0
+
+	for _, line := range lines {
+		// split line in the middle
+		comp1 := line[:len(line)/2]
+		comp2 := line[len(line)/2:]
+
+		itemList1 := []rune(comp1)
+		itemList2 := []rune(comp2)
+
+		uniqueList1 := removeDuplicate(itemList1)
+		uniqueList2 := removeDuplicate(itemList2)
+
+		log.Println("Comparing: ", string(uniqueList1), "with", string(uniqueList2))
+
+		for _, item1 := range uniqueList1 {
+			for _, item2 := range uniqueList2 {
+				if item1 == item2 {
+					result += calculatePriority(item1, item2)
+					break;
+				}
+			}
+		}
+
+		log.Println("Result: ", result)
+	}
+
+}

@@ -1,0 +1,19 @@
+package main
+
+import (
+	"testing"
+	"log"
+)
+
+
+func TestMove(t *testing.T) {
+	ship := map[int]stack{
+		0: {"A", "B", "C"},
+		1: {"D", "E", "F"},
+		2: {"G", "H", "I"},
+	}
+
+	ship = move(ship, 0, 1)
+
+	log.Println(ship)
+}
