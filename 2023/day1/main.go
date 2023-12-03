@@ -1,10 +1,11 @@
 package main
 
-
 import (
+	"golang.org/x/text/search"
+	"golang.org/x/text/language"
 	"fmt"
-	"os"
 	"bufio"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -17,6 +18,11 @@ func getFirstLast(line string) string {
 				numOnly += string(line[i])
 			}
 		}
+
+		if len(numOnly) == 0 {
+			return ""
+		}
+
 		firstLast :=  string(numOnly[0])+string(numOnly[len(numOnly)-1])
 		return firstLast
 }
@@ -36,13 +42,45 @@ func replaceStringNumber(line string) string {
 	return line
 }
 
+func SubstringIndex(str string, substr string) (int, bool) {
+    m := search.New(language.English, search.IgnoreCase)
+    start, _ := m.IndexString(str, substr)
+    if start == -1 {
+        return start, false
+    }
+    return start, true
+}
 
 func ReplaceStringNumbers(line string) string {
-	for i := 1; i < len(line) + 1 ; i++ {
-		line = replaceStringNumber(line[0:i]) + line[i:]
+	fmt.Println("ReplaceStringNumbers", line)
+
+	numbers := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
+
+	resultList := make([]string, len(line))
+
+	marker := 0
+	for i := 1; i < len(line) +1; i++ {
+		for _, number := range numbers {
+			fmt.Println("Checking sub", line[marker:i], number)
+			idx, ok := SubstringIndex(line[marker:i], number)
+			if ok {
+				marker+=idx+1
+				fmt.Println("Found", number, "at", idx)
+				resultList = append(resultList, number)
+			}
+		}
 	}
 
-	return line
+	fmt.Println("resultList", resultList)
+
+	for i := 0; i < len(resultList) ; i++ {
+		resultList[i] = replaceStringNumber(resultList[i])
+	}
+
+	fmt.Println("resultList", resultList)
+
+	return strings.Join(resultList, "")
 }
 
 func CalculateLineCount(line string) int {
@@ -52,21 +90,21 @@ func CalculateLineCount(line string) int {
 	return count
 }
 
-func main() {
-	file, err := os.Open("input.txt")
-	if err != nil {
-		fmt.Println("Error", err)
-	}
-
-	scanner := bufio.NewScanner(file)
-
+func CalculateLines(scanner *bufio.Scanner) int {
 	result := 0
-
 	for scanner.Scan() {
-		count := CalculateLineCount(scanner.Text())
-		fmt.Println(scanner.Text(), "Result", result+count, "=", result ,"+",count)
-		result += count
+		result += CalculateLineCount(scanner.Text())
 	}
+	return result
+}
+
+func main() {
+	f, _ := os.Open("input.txt")
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+
+	result := CalculateLines(scanner)
 
 	fmt.Println("Result", result) //55686
 }

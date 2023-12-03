@@ -6,8 +6,69 @@ package main
 
 
 import (
+	"bufio"
+	"os"
+	"fmt"
 	"testing"
 )
+
+func TestGetFirstLast(t *testing.T) {
+    testCases := []struct {
+        name string
+        input string
+        expectedOutput int
+    }{
+        {"TypicalCase", "Hello1234World", 14},
+        {"AllNumbers", "98765", 95},
+        {"SingleNumber", "123", 13},
+        {"EmptyString", "", 0}, // Adjust based on your error handling
+    }
+
+    for _, tc := range testCases {
+        t.Run(tc.name, func(t *testing.T) {
+            output := CalculateLineCount(tc.input)
+			if output != tc.expectedOutput {
+                t.Errorf("getFirstLast(%s) = %d; want %d", tc.input, output, tc.expectedOutput)
+            }
+        })
+    }
+}
+
+
+func TestReplaceStringNumbers(t *testing.T) {
+	testCases := []struct {
+		name string
+		input string
+		expectedOutput string
+	}{
+		{"TypicalCase", "Hello1234World", "1234"},
+		{"AllNumbers", "98765", "98765"},
+		{"OneSpelledOut", "nonumbersnine", "9"},
+		{"SingleNumber", "123", "123"},
+		{"EmptyString", "0", "0"}, // Adjust based on your error handling
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fmt.Println(tc.input)
+			output := ReplaceStringNumbers(tc.input)
+			if output != tc.expectedOutput {
+				t.Errorf("ReplaceStringNumbers(%s) = %s; want %s", tc.input, output, tc.expectedOutput)
+			}
+		})
+	}
+}
+
+func TestCalculateLineCount0(t *testing.T) {
+	sut := "nonumbersnine"
+
+	result := CalculateLineCount(sut)
+	if result == 99 {
+		t.Log("TestCalculateLineCount0 passed")
+	} else {
+		t.Errorf("TestCalculateLineCount0 failed, expected %v, got %v", 13, result)
+	}
+}
 
 func TestCalculateLineCount(t *testing.T) {
 	sut := "two1nine"
@@ -98,20 +159,11 @@ func TestCalculateLineCount7(t *testing.T) {
 }
 
 func TestMain(t *testing.T) {
-	sut := []string{
-		"two1nine",
-		"eightwothree",
-		"abcone2threexyz",
-		"xtwone3four",
-		"4nineeightseven2",
-		"zoneight234",
-		"7pqrstsixteen",
-	}
+ 	f, _ := os.Open("input_test.txt")
+    defer f.Close()
 
-	result := 0
-	for _, v := range sut {
-		result += CalculateLineCount(v)
-	}
+    scanner := bufio.NewScanner(f)
+    result := CalculateLines(scanner)
 
 	if result == 281 {
 		t.Log("TestMain passed")
